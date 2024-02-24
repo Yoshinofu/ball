@@ -22,6 +22,11 @@ typedef struct {
     char name[128]; // 項目名格納用変数
 } MenuElement_t;
 
+typedef struct {
+    int x, y;
+    int Num_Spin;
+} MinoElement_t;
+
 
 
 static const int Field_Width = 12;
@@ -33,8 +38,7 @@ static const int Reference_Point_Y = -60;
 static const int N_Reference_Point_X = 500;
 static const int N_Reference_Point_Y = 30;
 
-int count = 1;
-int stack_flag = 0, stack_flag_time = 0;
+int count = 0;
 
 int Field_list[Field_Height][Field_Width];
 int Block_list[4][4];
@@ -546,36 +550,36 @@ void Write_Field() {
     }
 }
 
-int Normal_Tetris(int *x,int *y, int *bfore_key, int *bfore_space, int *Num_Spin) {
+int Normal_Tetris(int *bfore_key, int *bfore_space, MinoElement_t *MinoElement) {
 
     //計算フェーズ
     
-    Move_Spin(Num_Spin, bfore_space);
+    Move_Spin(&MinoElement->Num_Spin, bfore_space);
 
-    Dec_Block(*Num_Spin, Next_Num_Mino_list[0], Block_list);
+    Dec_Block(MinoElement->Num_Spin, Next_Num_Mino_list[0], Block_list);
 
-    if (Is_Below(*x, *y) == 1) {
-        *Num_Spin -= 1;
-        if (*Num_Spin < 0) {
+    if (Is_Below(MinoElement->x, MinoElement->y) == 1) {
+        MinoElement->Num_Spin -= 1;
+        if (MinoElement->Num_Spin < 0) {
             function_status = 20;
         }
 
         Reset_Block_List(Block_list);
-        Dec_Block(*Num_Spin, Next_Num_Mino_list[0], Block_list);
+        Dec_Block(MinoElement->Num_Spin, Next_Num_Mino_list[0], Block_list);
     }
 
-    Drop(x, y);
+    Drop(&MinoElement->x, &MinoElement->y);
 
-    Move_LR(x, y, bfore_key);
+    Move_LR(&MinoElement->x, &MinoElement->y, bfore_key);
 
-    Move_UP(x, y, bfore_key);
+    Move_UP(&MinoElement->x, &MinoElement->y, bfore_key);
 
 
-    switch (Is_Below(*x, *y)){
+    switch (Is_Below(MinoElement->x, MinoElement->x)){
     case 0:
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                if (Block_list[i][j] >= 1) Field_list[*y + i][*x + j] = Block_list[i][j];
+                if (Block_list[i][j] >= 1) Field_list[MinoElement->y + i][MinoElement->x + j] = Block_list[i][j];
                 Block_list[i][j] = 0;
             }
         }
@@ -583,13 +587,13 @@ int Normal_Tetris(int *x,int *y, int *bfore_key, int *bfore_space, int *Num_Spin
     case 1:
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                if (Block_list[i][j] >= 1) Field_list[*y + i][*x + j] = Block_list[i][j]+10;
+                if (Block_list[i][j] >= 1) Field_list[MinoElement->y + i][MinoElement->x + j] = Block_list[i][j]+10;
                 Block_list[i][j] = 0;
             }
         }
-        *x = 5;
-        *y = 0;
-        *Num_Spin = 0;
+        MinoElement->x = 5;
+        MinoElement->y = 0;
+        MinoElement->Num_Spin = 0;
 
         for (int i = 0; i < 4; i++) {
             Next_Num_Mino_list[i] = Next_Num_Mino_list[i + 1];
@@ -656,12 +660,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         { 100, 300, "ゲーム終了" },
     };
     int SelectNum = 0; 
+    
+    MinoElement_t MinoElement = { 4,0,0 };
 
     int img = LoadGraph("img/054.png");
     int End_x = 350, End_y = 200;
 
-    int x = 5, y = 0; //ブロックを落とす座標
-    int Num_Spin = 0; //回転回数
     int bfore_key = 0; //キーボード入力flag
     int bfore_space = 0; //スペースキーflag
 
@@ -677,6 +681,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         ClearDrawScreen();
 
         DrawFormatString(20, 20, Clolr_White,"%d",count/60);
+        DrawFormatString(20, 50, Clolr_White, "%d", function_status);
+        DrawFormatString(20, 80, Clolr_White, "%d", MinoElement.Num_Spin);
 
         switch (function_status / 10) {
 
@@ -710,7 +716,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
             case 11:
 
-                Normal_Tetris(&x, &y, &bfore_key, &bfore_space, &Num_Spin);
+                Normal_Tetris(&bfore_key, &bfore_space, &MinoElement);
 
                 White_Line();
 
