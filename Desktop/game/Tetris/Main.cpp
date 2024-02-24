@@ -563,7 +563,6 @@ int Normal_Tetris(int *bfore_key, int *bfore_space, MinoElement_t *MinoElement) 
         if (MinoElement->Num_Spin < 0) {
             function_status = 20;
         }
-
         Reset_Block_List(Block_list);
         Dec_Block(MinoElement->Num_Spin, Next_Num_Mino_list[0], Block_list);
     }
@@ -575,7 +574,7 @@ int Normal_Tetris(int *bfore_key, int *bfore_space, MinoElement_t *MinoElement) 
     Move_UP(&MinoElement->x, &MinoElement->y, bfore_key);
 
 
-    switch (Is_Below(MinoElement->x, MinoElement->x)){
+    switch (Is_Below(MinoElement->x, MinoElement->y)){
     case 0:
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
