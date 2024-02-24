@@ -1,21 +1,21 @@
 #include "DxLib.h"
 #include <math.h>
-#include< cstdlib >
+#include <cstdlib>
 
 #define PI 3.1415926f
 
 int Key[256];
 int function_status = 0;
-int Clolr_White  = GetColor(255, 255, 255);
-int Clolr_Black  = GetColor(  0,   0,   0);
-int Clolr_Red    = GetColor(255,   0,   0);
-int Clolr_Yellow = GetColor(255, 255,   0);
-int Clolr_Lime   = GetColor(  0, 255,   0);
-int Clolr_Aqua   = GetColor(  0, 255, 255);
-int Clolr_Purple = GetColor(255,   0, 255);
-int Clolr_Blue   = GetColor(  0,   0, 255);
-int Clolr_Orange = GetColor(255, 128,   0);
-int Clolr_Gray   = GetColor(128, 128, 128);
+int Clolr_White = GetColor(255, 255, 255);
+int Clolr_Black = GetColor(0, 0, 0);
+int Clolr_Red = GetColor(255, 0, 0);
+int Clolr_Yellow = GetColor(255, 255, 0);
+int Clolr_Lime = GetColor(0, 255, 0);
+int Clolr_Aqua = GetColor(0, 255, 255);
+int Clolr_Purple = GetColor(255, 0, 255);
+int Clolr_Blue = GetColor(0, 0, 255);
+int Clolr_Orange = GetColor(255, 128, 0);
+int Clolr_Gray = GetColor(128, 128, 128);
 
 typedef struct {
     int x, y;       // 座標格納用変数
@@ -61,7 +61,7 @@ int gpUpdateKey() {
     return 0;
 }
 
-void Opning(int *SelectNum, MenuElement_t MenuElement[]) {
+void Opning(int* SelectNum, MenuElement_t MenuElement[]) {
     if (Key[KEY_INPUT_DOWN] == 1) { // 下キーが押された瞬間だけ処理
 
         *SelectNum = (*SelectNum + 1) % 5; // 現在の選択項目を一つ下にずらす(ループする)
@@ -91,7 +91,7 @@ void Opning(int *SelectNum, MenuElement_t MenuElement[]) {
     for (int i = 0; i < 5; i++) { // メニュー項目を描画
         DrawFormatString(MenuElement[i].x, MenuElement[i].y, GetColor(255, 255, 255), MenuElement[i].name);
     }
-    
+
 }
 
 int Ending() {
@@ -120,7 +120,7 @@ void N_Block(int x, int y, int Clolr) { //引数はマス座標
 void Flame() { //フレーム生成
     for (int i = 0; i < Field_Height; i++) {
         Field_list[i][0] = 30;
-        Field_list[i][Field_Width-1] = 30;
+        Field_list[i][Field_Width - 1] = 30;
     }
     for (int i = 0; i < Field_Width; i++) {
         Field_list[Field_Height - 1][i] = 30;
@@ -209,7 +209,7 @@ void I_Block(int Num_Spin, int Mino_list[4][4]) {
             Mino_list[1][3] = 3;
         }
         break;
- 
+
     default:
         break;
     }
@@ -411,13 +411,13 @@ int Is_Left(int x, int y) {
     return 0;
 }
 
-void Move_LR(int *x, int *y, int *bfore_key) { //キーボード入力による座標反映
-    if (Key[KEY_INPUT_RIGHT] >= 1 && *bfore_key == 0 && Is_Right(*x,*y) == 0 ) {
+void Move_LR(int* x, int* y, int* bfore_key) { //キーボード入力による座標反映
+    if (Key[KEY_INPUT_RIGHT] >= 1 && *bfore_key == 0 && Is_Right(*x, *y) == 0) {
         *bfore_key = 1;
         *x += 1;
     }
 
-    if (Key[KEY_INPUT_LEFT] >= 1 && *bfore_key == 0 && Is_Left(*x,*y) == 0 ) {
+    if (Key[KEY_INPUT_LEFT] >= 1 && *bfore_key == 0 && Is_Left(*x, *y) == 0) {
         *bfore_key = 1;
         *x -= 1;
     }
@@ -438,8 +438,8 @@ void Move_UP(int* x, int* y, int* bfore_key) {
     if (Key[KEY_INPUT_UP] == 0 && Key[KEY_INPUT_RIGHT] == 0 && Key[KEY_INPUT_LEFT] == 0) *bfore_key = 0;
 }
 
-void Move_Spin( int *Num_Spin, int *bfore_space) {
-    if (Key[KEY_INPUT_SPACE] >= 1 && *bfore_space == 0 ) {
+void Move_Spin(int* Num_Spin, int* bfore_space) {
+    if (Key[KEY_INPUT_SPACE] >= 1 && *bfore_space == 0) {
         *Num_Spin += 1;
         *bfore_space = 1;
     }
@@ -449,18 +449,18 @@ void Move_Spin( int *Num_Spin, int *bfore_space) {
 
 void Drop_Line(int y) {
     for (int j = y; j > 0; j--) {
-        for (int i = 1; i < Field_Width-1; i++) {
+        for (int i = 1; i < Field_Width - 1; i++) {
             Field_list[j][i] = Field_list[j - 1][i];
         }
     }
 }
 
 void Clear_Line() {
-    for (int i = 0; i < Field_Height -1; i++) {
+    for (int i = 0; i < Field_Height - 1; i++) {
         int j = 1;
         while (Field_list[i][j] >= 10) {
             if (j >= 10) {
-                for (int k = 1; k < Field_Width-1; k++) {
+                for (int k = 1; k < Field_Width - 1; k++) {
                     Field_list[i][k] = 0;
                 }
                 Drop_Line(i);
@@ -472,7 +472,7 @@ void Clear_Line() {
 }
 
 int Dec_Clolr(int Num) {
-    switch (Num){
+    switch (Num) {
     case 1:
         return Clolr_Purple;
     case 2:
@@ -550,10 +550,10 @@ void Write_Field() {
     }
 }
 
-int Normal_Tetris(int *bfore_key, int *bfore_space, MinoElement_t *MinoElement) {
+int Normal_Tetris(int* bfore_key, int* bfore_space, MinoElement_t* MinoElement) {
 
     //計算フェーズ
-    
+
     Move_Spin(&MinoElement->Num_Spin, bfore_space);
 
     Dec_Block(MinoElement->Num_Spin, Next_Num_Mino_list[0], Block_list);
@@ -574,7 +574,7 @@ int Normal_Tetris(int *bfore_key, int *bfore_space, MinoElement_t *MinoElement) 
     Move_UP(&MinoElement->x, &MinoElement->y, bfore_key);
 
 
-    switch (Is_Below(MinoElement->x, MinoElement->y)){
+    switch (Is_Below(MinoElement->x, MinoElement->y)) {
     case 0:
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
@@ -586,7 +586,7 @@ int Normal_Tetris(int *bfore_key, int *bfore_space, MinoElement_t *MinoElement) 
     case 1:
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                if (Block_list[i][j] >= 1) Field_list[MinoElement->y + i][MinoElement->x + j] = Block_list[i][j]+10;
+                if (Block_list[i][j] >= 1) Field_list[MinoElement->y + i][MinoElement->x + j] = Block_list[i][j] + 10;
                 Block_list[i][j] = 0;
             }
         }
@@ -622,7 +622,7 @@ int Normal_Tetris(int *bfore_key, int *bfore_space, MinoElement_t *MinoElement) 
     for (int i = 1; i < 5; i++) {
         for (int j = 0; j < 4; j++) {
             for (int k = 0; k < 4; k++) {
-                N_Block(j, k + (i-1)*5, Dec_Clolr(Next_Mino_list[i][k][j]));
+                N_Block(j, k + (i - 1) * 5, Dec_Clolr(Next_Mino_list[i][k][j]));
             }
         }
     }
@@ -635,12 +635,12 @@ int Normal_Tetris(int *bfore_key, int *bfore_space, MinoElement_t *MinoElement) 
 void White_Line() {
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 50);
     for (int j = 0; j < Field_Width; j++) {
-        for (int i = 0; i < Field_Height*21; i++) {
+        for (int i = 0; i < Field_Height * 21; i++) {
             DrawPixel(Reference_Point_X + j * 21 - 1, Reference_Point_Y + i, Clolr_White);
         }
     }
 
-    for (int j = 0; j < Field_Width*21; j++) {
+    for (int j = 0; j < Field_Width * 21; j++) {
         for (int i = 0; i < Field_Height; i++) {
             DrawPixel(Reference_Point_X + j, Reference_Point_Y + i * 21 - 1, Clolr_White);
         }
@@ -649,17 +649,17 @@ void White_Line() {
 }
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-	ChangeWindowMode(TRUE), DxLib_Init(), SetDrawScreen(DX_SCREEN_BACK);//ウィンドウモード変更と初期化と裏画面設定
+    ChangeWindowMode(TRUE), DxLib_Init(), SetDrawScreen(DX_SCREEN_BACK);//ウィンドウモード変更と初期化と裏画面設定
 
     MenuElement_t MenuElement[5] = {
-        {  80, 100, "Normal Tetris" }, 
+        {  80, 100, "Normal Tetris" },
         { 100, 150, "コダック" },
         { 100, 200, "コダック" },
         { 100, 250, "コダック" },
         { 100, 300, "ゲーム終了" },
     };
-    int SelectNum = 0; 
-    
+    int SelectNum = 0;
+
     MinoElement_t MinoElement = { 4,0,0 };
 
     int img = LoadGraph("img/054.png");
@@ -675,11 +675,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     Flame();
 
-	while (ScreenFlip() == 0 && ProcessMessage() == 0 && gpUpdateKey() == 0) {
+    while (ScreenFlip() == 0 && ProcessMessage() == 0 && gpUpdateKey() == 0) {
 
         ClearDrawScreen();
 
-        DrawFormatString(20, 20, Clolr_White,"%d",count/60);
+        DrawFormatString(20, 20, Clolr_White, "%d", count / 60);
         DrawFormatString(20, 50, Clolr_White, "%d", function_status);
         DrawFormatString(20, 80, Clolr_White, "%d", MinoElement.Num_Spin);
 
@@ -740,17 +740,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             DrawFormatString(120, 150, Clolr_White, "おわり");
             SetFontSize(20);
 
-            if (Key[KEY_INPUT_RIGHT] >= 1) { 
-                End_x+=3;                       
+            if (Key[KEY_INPUT_RIGHT] >= 1) {
+                End_x += 3;
             }
-            if (Key[KEY_INPUT_DOWN] >= 1) { 
-                End_y+=3;                      
+            if (Key[KEY_INPUT_DOWN] >= 1) {
+                End_y += 3;
             }
-            if (Key[KEY_INPUT_LEFT] >= 1) { 
-                End_x-=3;                      
+            if (Key[KEY_INPUT_LEFT] >= 1) {
+                End_x -= 3;
             }
-            if (Key[KEY_INPUT_UP] >= 1) { 
-                End_y-=3;                      
+            if (Key[KEY_INPUT_UP] >= 1) {
+                End_y -= 3;
             }
 
             SetDrawBlendMode(DX_BLENDMODE_ADD, 50);
@@ -767,7 +767,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             return 0;
             break;
         }
-	}
-	DxLib_End(); // DXライブラリ終了処理
-	return 0;
+    }
+    DxLib_End(); // DXライブラリ終了処理
+    return 0;
 }
