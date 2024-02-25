@@ -27,7 +27,7 @@ typedef struct {
     int Num_Spin;
 } MinoElement_t;
 
-
+static const int Block_Size = 20;
 
 static const int Field_Width = 12;
 static const int Field_Height = 26;
@@ -38,13 +38,20 @@ static const int Reference_Point_Y = -60;
 static const int N_Reference_Point_X = 500;
 static const int N_Reference_Point_Y = 30;
 
+static const int F_Reference_Point_X = 30;
+static const int F_Reference_Point_Y = 150;
+
 int count = 0;
 
 int Field_list[Field_Height][Field_Width];
-int Block_list[4][4];
+int Drop_Mino_list[4][4];
+int Fold_Mino_list[4][4];
 
 int Next_Num_Mino_list[5];
 int Next_Mino_list[5][4][4];
+
+int Fold_flag = 0;
+int Fold_Mino = 0;
 
 // キーの入力状態を更新する
 int gpUpdateKey() {
@@ -62,30 +69,33 @@ int gpUpdateKey() {
 }
 
 void Opning(int* SelectNum, MenuElement_t MenuElement[]) {
-    if (Key[KEY_INPUT_DOWN] == 1) { // 下キーが押された瞬間だけ処理
 
-        *SelectNum = (*SelectNum + 1) % 5; // 現在の選択項目を一つ下にずらす(ループする)
+    if (Key[KEY_INPUT_DOWN] == 1) { 
+
+        *SelectNum = (*SelectNum + 1) % 5; 
     }
 
-    if (Key[KEY_INPUT_UP] == 1) { // 上キーが押された瞬間だけ処理
+    if (Key[KEY_INPUT_UP] == 1) { 
 
-        *SelectNum = (*SelectNum + 4) % 5; // 現在の選択項目を一つ上にずらす(逆ループする)
+        *SelectNum = (*SelectNum + 4) % 5; 
     }
 
-    if (Key[KEY_INPUT_DOWN] == 1 || Key[KEY_INPUT_UP] == 1) { // 下キーか、上キーが押された瞬間
-        for (int i = 0; i < 5; i++) {              // メニュー項目数である5個ループ処理
-            if (i == *SelectNum) {          // 今処理しているのが、選択番号と同じ要素なら
-                MenuElement[i].x = 80; // 座標を80にする
+    if (Key[KEY_INPUT_DOWN] == 1 || Key[KEY_INPUT_UP] == 1) { 
+        for (int i = 0; i < 5; i++) {             
+            if (i == *SelectNum) {        
+                MenuElement[i].x = 80;
             }
-            else {                       // 今処理しているのが、選択番号以外なら
-                MenuElement[i].x = 100;// 座標を100にする
+            else {                       
+                MenuElement[i].x = 100;
             }
         }
     }
 
+    //セレクト
     if (Key[KEY_INPUT_SPACE] == 1 && *SelectNum == 0) {
         function_status = 10;
     }
+
     // 描画フェーズ
 
     for (int i = 0; i < 5; i++) { // メニュー項目を描画
@@ -100,22 +110,50 @@ int Ending() {
 
 
 void Block(int x, int y, int Clolr) { //引数はマス座標
-    int d_x = Reference_Point_X + x * 21, d_y = Reference_Point_Y + y * 21;
-    for (int i = 0; i < 20; i++) {
-        for (int j = 0; j < 20; j++) {
+    int d_x = Reference_Point_X + x * ( Block_Size + 1), d_y = Reference_Point_Y + y * (Block_Size + 1);
+    for (int i = 0; i < Block_Size; i++) {
+        for (int j = 0; j < Block_Size; j++) {
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
+            if ( i==0 || i==Block_Size-1 || j==0 || j==Block_Size-1) SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
             DrawPixel(d_x + i, d_y + j, Clolr);
         }
     }
 }
 
+
 void N_Block(int x, int y, int Clolr) { //引数はマス座標
-    int d_x = N_Reference_Point_X + x * 21, d_y = N_Reference_Point_Y + y * 21;
-    for (int i = 0; i < 20; i++) {
-        for (int j = 0; j < 20; j++) {
+    int d_x = N_Reference_Point_X + x * ( Block_Size + 1 ), d_y = N_Reference_Point_Y + y * ( Block_Size + 1 );
+    for (int i = 0; i < Block_Size; i++) {
+        for (int j = 0; j < Block_Size; j++) {
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
+            if (i == 0 || i == Block_Size - 1 || j == 0 || j == Block_Size - 1) SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
             DrawPixel(d_x + i, d_y + j, Clolr);
         }
     }
 }
+
+void F_Block(int x, int y, int Clolr) { //引数はマス座標
+    int d_x = F_Reference_Point_X + x * (Block_Size + 1), d_y = F_Reference_Point_Y + y * (Block_Size + 1);
+    for (int i = 0; i < Block_Size; i++) {
+        for (int j = 0; j < Block_Size; j++) {
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
+            if (i == 0 || i == Block_Size - 1 || j == 0 || j == Block_Size - 1) SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+            DrawPixel(d_x + i, d_y + j, Clolr);
+        }
+    }
+}
+
+void G_Block(int x, int y, int Clolr) { //引数はマス座標
+    int d_x = Reference_Point_X + x * (Block_Size + 1), d_y = Reference_Point_Y + y * (Block_Size + 1);
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 70);
+    for (int i = 0; i < Block_Size; i++) {
+        for (int j = 0; j < Block_Size; j++) {
+            DrawPixel(d_x + i, d_y + j, Clolr);
+        }
+    }
+    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+}
+
 
 void Flame() { //フレーム生成
     for (int i = 0; i < Field_Height; i++) {
@@ -371,18 +409,20 @@ void J_Block(int Num_Spin, int Mino_list[4][4]) {
     }
 }
 
-int Is_Below(int x, int y) {
+bool Is_Below(int x, int y) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
-            if (Field_list[y + i + 1][x + j] * Block_list[i][j] >= 10)return 1;
+            if (Field_list[y + i + 1][x + j] * Drop_Mino_list[i][j] >= 10 ) {
+                return true;
+            }
         }
     }
-    return 0;
+    return false;
 }
 
 void Drop(int* x, int* y) { //１フレームごとにブロック落下
 
-    if (Is_Below(*x, *y) == 0) {
+    if ( ! Is_Below(*x, *y)) {
         if (Key[KEY_INPUT_DOWN] >= 1 && count % 15 == 0) {
             *y += 1;
         }
@@ -393,25 +433,25 @@ void Drop(int* x, int* y) { //１フレームごとにブロック落下
     }
 }
 
-int Is_Right(int x, int y) {
+bool Is_Right(int x, int y) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
-            if (Field_list[y + i][x + j + 1] * Block_list[i][j] >= 10) return 1;
+            if (Field_list[y + i][x + j + 1] * Drop_Mino_list[i][j] >= 10) return true;
         }
     }
-    return 0;
+    return false;
 }
 
-int Is_Left(int x, int y) {
+bool Is_Left(int x, int y) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
-            if (Field_list[y + i][x + j - 1] * Block_list[i][j] >= 10) return 1;
+            if (Field_list[y + i][x + j - 1] * Drop_Mino_list[i][j] >= 10) return true;
         }
     }
-    return 0;
+    return false;
 }
 
-void Move_LR(int* x, int* y, int* bfore_key) { //キーボード入力による座標反映
+void Key_LR(int* x, int* y, int* bfore_key) { //キーボード入力による座標反映
     if (Key[KEY_INPUT_RIGHT] >= 1 && *bfore_key == 0 && Is_Right(*x, *y) == 0) {
         *bfore_key = 1;
         *x += 1;
@@ -425,7 +465,7 @@ void Move_LR(int* x, int* y, int* bfore_key) { //キーボード入力による座標反映
     if (Key[KEY_INPUT_UP] == 0 && Key[KEY_INPUT_RIGHT] == 0 && Key[KEY_INPUT_LEFT] == 0) *bfore_key = 0;
 }
 
-void Move_UP(int* x, int* y, int* bfore_key) {
+void Key_UP(int* x, int* y, int* bfore_key) {
     if (Key[KEY_INPUT_UP] >= 1 && *bfore_key == 0) {
         *bfore_key = 1;
         int i = *y;
@@ -438,12 +478,44 @@ void Move_UP(int* x, int* y, int* bfore_key) {
     if (Key[KEY_INPUT_UP] == 0 && Key[KEY_INPUT_RIGHT] == 0 && Key[KEY_INPUT_LEFT] == 0) *bfore_key = 0;
 }
 
-void Move_Spin(int* Num_Spin, int* bfore_space) {
+void Key_Spin(int* Num_Spin, int* bfore_space) {
     if (Key[KEY_INPUT_SPACE] >= 1 && *bfore_space == 0) {
         *Num_Spin += 1;
         *bfore_space = 1;
     }
     if (Key[KEY_INPUT_SPACE] == 0) *bfore_space = 0;
+}
+
+void Key_Fold(int *Num_Spin) {
+    if (Key[KEY_INPUT_RSHIFT] == 1 && Fold_flag == 0) {
+        Fold_flag = 1;
+        *Num_Spin = 0;
+
+        if (Fold_Mino == 0) {
+            Fold_Mino = Next_Num_Mino_list[0];
+
+            for (int i = 0; i < 4; i++) {
+                Next_Num_Mino_list[i] = Next_Num_Mino_list[i + 1];
+            }
+
+            Next_Num_Mino_list[4] = GetRand(6) + 1;
+        }
+
+        else {
+            int t;
+            t = Fold_Mino;
+            Fold_Mino = Next_Num_Mino_list[0];
+            Next_Num_Mino_list[0] = t;
+        }
+        
+    }
+}
+
+void The_Bottom_y(int x, int y, int *bottom_y) {
+    while (!Is_Below(x, y)) {
+        y += 1;
+    }
+    *bottom_y = y;
 }
 
 
@@ -470,6 +542,7 @@ void Clear_Line() {
         }
     }
 }
+
 
 int Dec_Clolr(int Num) {
     switch (Num) {
@@ -521,7 +594,7 @@ void Dec_Block(int Num_Spin, int Num_Block, int Mino_list[4][4]) {
     }
 }
 
-void Reset_Block_List(int Mino_list[4][4]) {
+void Reset_Mino_List(int Mino_list[4][4]) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             Mino_list[i][j] = 0;
@@ -529,7 +602,7 @@ void Reset_Block_List(int Mino_list[4][4]) {
     }
 }
 
-void Write_Field() {
+void Draw_Field() {
     for (int i = 0; i < Field_Height; i++) {
         for (int j = 0; j < Field_Width; j++) {
 
@@ -546,53 +619,75 @@ void Write_Field() {
                 Field_list[i][j] = 0;
             }
 
+            else if (Field_list[i][j] < 0) {
+                G_Block(j, i, Dec_Clolr( Field_list[i][j] * (-1)));
+                Field_list[i][j] = 0;
+            }
+
         }
     }
 }
 
-int Normal_Tetris(int* bfore_key, int* bfore_space, MinoElement_t* MinoElement) {
+int Normal_Tetris(int* bfore_key, int* bfore_space, MinoElement_t* MinoElement, int *bottom_y) {
 
     //計算フェーズ
 
-    Move_Spin(&MinoElement->Num_Spin, bfore_space);
+    Key_Spin(&MinoElement->Num_Spin, bfore_space);
 
-    Dec_Block(MinoElement->Num_Spin, Next_Num_Mino_list[0], Block_list);
+    Dec_Block(MinoElement->Num_Spin, Next_Num_Mino_list[0], Drop_Mino_list);
 
-    if (Is_Below(MinoElement->x, MinoElement->y) == 1) {
-        MinoElement->Num_Spin -= 1;
-        if (MinoElement->Num_Spin < 0) {
-            function_status = 20;
-        }
-        Reset_Block_List(Block_list);
-        Dec_Block(MinoElement->Num_Spin, Next_Num_Mino_list[0], Block_list);
+    if (MinoElement->y == 0 && Is_Below(MinoElement->x, MinoElement->y)){
+        function_status = 20;
+        return 0;
     }
+
+    if (Is_Below(MinoElement->x, MinoElement->y)) {
+        MinoElement->x += 1;
+        if (Is_Below(MinoElement->x, MinoElement->y)) {
+            MinoElement->x -= 2;
+            if (Is_Below(MinoElement->x, MinoElement->y)) {
+                MinoElement->x -= 1;
+            }
+        }
+        Reset_Mino_List(Drop_Mino_list);
+        Dec_Block(MinoElement->Num_Spin, Next_Num_Mino_list[0], Drop_Mino_list);
+    }
+
 
     Drop(&MinoElement->x, &MinoElement->y);
 
-    Move_LR(&MinoElement->x, &MinoElement->y, bfore_key);
+    Key_LR(&MinoElement->x, &MinoElement->y, bfore_key);
 
-    Move_UP(&MinoElement->x, &MinoElement->y, bfore_key);
+    Key_UP(&MinoElement->x, &MinoElement->y, bfore_key);
 
+    Key_Fold(&MinoElement->Num_Spin);
+
+    The_Bottom_y(MinoElement->x, MinoElement->y, bottom_y);
 
     switch (Is_Below(MinoElement->x, MinoElement->y)) {
-    case 0:
+    case false:
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                if (Block_list[i][j] >= 1) Field_list[MinoElement->y + i][MinoElement->x + j] = Block_list[i][j];
-                Block_list[i][j] = 0;
+                if (Drop_Mino_list[i][j] >= 1) {
+                    Field_list[*bottom_y + i][MinoElement->x + j] = Drop_Mino_list[i][j] * (-1);
+                    Field_list[MinoElement->y + i][MinoElement->x + j] = Drop_Mino_list[i][j];
+                }
+                Drop_Mino_list[i][j] = 0;
             }
         }
         break;
-    case 1:
+
+    case true:
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                if (Block_list[i][j] >= 1) Field_list[MinoElement->y + i][MinoElement->x + j] = Block_list[i][j] + 10;
-                Block_list[i][j] = 0;
+                if (Drop_Mino_list[i][j] >= 1) Field_list[MinoElement->y + i][MinoElement->x + j] = Drop_Mino_list[i][j] + 10;
+                Drop_Mino_list[i][j] = 0;
             }
         }
-        MinoElement->x = 5;
+        MinoElement->x = 4;
         MinoElement->y = 0;
         MinoElement->Num_Spin = 0;
+        Fold_flag = 0;
 
         for (int i = 0; i < 4; i++) {
             Next_Num_Mino_list[i] = Next_Num_Mino_list[i + 1];
@@ -608,14 +703,27 @@ int Normal_Tetris(int* bfore_key, int* bfore_space, MinoElement_t* MinoElement) 
 
     Clear_Line();
 
+    //Fold生成
+    Reset_Mino_List(Fold_Mino_list);
+    Dec_Block( 0, Fold_Mino, Fold_Mino_list);
+
     //Next生成
     for (int i = 0; i < 5; i++) {
-        Reset_Block_List(Next_Mino_list[i]);
+        Reset_Mino_List(Next_Mino_list[i]);
         Dec_Block(0, Next_Num_Mino_list[i], Next_Mino_list[i]);
     }
 
     //描画フェーズ
-    Write_Field();
+
+    Draw_Field();
+
+    //Fold
+    DrawFormatString(F_Reference_Point_X, F_Reference_Point_Y -20, Clolr_White, "Fold");
+    for (int j = 0; j < 4; j++) {
+        for (int k = 0; k < 4; k++) {
+            F_Block(k, j, Dec_Clolr(Fold_Mino_list[j][k]));
+        }
+    }
 
     //Next
     DrawFormatString(N_Reference_Point_X + 20, N_Reference_Point_Y - 20, Clolr_White, "Next");
@@ -626,23 +734,20 @@ int Normal_Tetris(int* bfore_key, int* bfore_space, MinoElement_t* MinoElement) 
             }
         }
     }
-
-
-
     return 0;
 }
 
 void White_Line() {
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 50);
     for (int j = 0; j < Field_Width; j++) {
-        for (int i = 0; i < Field_Height * 21; i++) {
-            DrawPixel(Reference_Point_X + j * 21 - 1, Reference_Point_Y + i, Clolr_White);
+        for (int i = 0; i < Field_Height * ( Block_Size + 1 ); i++) {
+            DrawPixel(Reference_Point_X + j * ( Block_Size + 1 ) - 1, Reference_Point_Y + i, Clolr_White);
         }
     }
 
-    for (int j = 0; j < Field_Width * 21; j++) {
+    for (int j = 0; j < Field_Width * ( Block_Size + 1 ); j++) {
         for (int i = 0; i < Field_Height; i++) {
-            DrawPixel(Reference_Point_X + j, Reference_Point_Y + i * 21 - 1, Clolr_White);
+            DrawPixel(Reference_Point_X + j, Reference_Point_Y + i * ( Block_Size + 1 ) - 1, Clolr_White);
         }
     }
     SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
@@ -662,11 +767,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     MinoElement_t MinoElement = { 4,0,0 };
 
-    int img = LoadGraph("img/054.png");
-    int End_x = 350, End_y = 200;
-
     int bfore_key = 0; //キーボード入力flag
     int bfore_space = 0; //スペースキーflag
+    int bottom_y = 20;
 
     for (int i = 0; i < 5; i++) {
         Next_Num_Mino_list[i] = GetRand(6) + 1;
@@ -681,7 +784,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
         DrawFormatString(20, 20, Clolr_White, "%d", count / 60);
         DrawFormatString(20, 50, Clolr_White, "%d", function_status);
-        DrawFormatString(20, 80, Clolr_White, "%d", MinoElement.Num_Spin);
 
         switch (function_status / 10) {
 
@@ -707,15 +809,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
                 SetFontSize(20);
 
                 White_Line();
-                SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
-                Write_Field();
+                Draw_Field();
+
+                SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
+                DrawBox(0,0,640,480,Clolr_Black,TRUE);
                 SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
                 break;
 
             case 11:
 
-                Normal_Tetris(&bfore_key, &bfore_space, &MinoElement);
+                Normal_Tetris(&bfore_key, &bfore_space, &MinoElement, &bottom_y);
 
                 White_Line();
 
@@ -732,33 +836,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             count += 1;
 
             White_Line();
-            SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
-            Write_Field();
+            Draw_Field();
+
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
+            DrawBox(0, 0, 640, 480, Clolr_Black, TRUE);
             SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
             SetFontSize(150);
             DrawFormatString(120, 150, Clolr_White, "おわり");
             SetFontSize(20);
-
-            if (Key[KEY_INPUT_RIGHT] >= 1) {
-                End_x += 3;
-            }
-            if (Key[KEY_INPUT_DOWN] >= 1) {
-                End_y += 3;
-            }
-            if (Key[KEY_INPUT_LEFT] >= 1) {
-                End_x -= 3;
-            }
-            if (Key[KEY_INPUT_UP] >= 1) {
-                End_y -= 3;
-            }
-
-            SetDrawBlendMode(DX_BLENDMODE_ADD, 50);
-            for (int s = 0; s < abs(sin(PI / 2 / 30 * count)) * 5 / 1; s++) {
-                DrawRotaGraph(End_x, End_y, sin(PI / 2 / 30 * count), 0.0, img, TRUE);
-            }
-
-            SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
             break;
 
